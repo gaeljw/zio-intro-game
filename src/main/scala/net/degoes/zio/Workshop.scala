@@ -118,7 +118,7 @@ object AlarmApp extends App {
     * Create an effect that will get a `Duration` from the user, by prompting
     * the user to enter a decimal number of seconds.
     */
-  lazy val getAlarmDuration: ZIO[Console, IOException, Duration] = {
+  lazy val getAlarmDuration: ZIO[Console, IOException, Duration] = { // lazy val better because refers to itself
     def parseDuration(input: String): IO[NumberFormatException, Duration] = {
       for {
         double <- ZIO.effect(input.toDouble).refineToOrDie[NumberFormatException]
@@ -145,8 +145,15 @@ object AlarmApp extends App {
     * sleeps the specified number of seconds, and then prints out a wakeup
     * alarm message.
     */
-  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] =
-    ???
+  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
+    (for {
+      _ <- putStrLn("Welcome to ZIO Alarm!")
+      duration <- getAlarmDuration
+      _ <- putStrLn(s"You will be awoken after $duration ms")
+      _ <- ZIO.sleep(duration) // async :)
+      _ <- putStrLn("Time to wake up")
+    } yield ()).fold(_ => 1, _ => 1)
+  }
 }
 
 object Cat extends App {
