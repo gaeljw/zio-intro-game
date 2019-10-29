@@ -1,8 +1,10 @@
 package net.degoes.zio
 
+import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 
 import zio._
+import zio.console.Console
 
 import scala.io.Source
 
@@ -239,8 +241,23 @@ object CatIncremental extends App {
     * or `ZManaged` to ensure the file is closed in the event of error or
     * interruption.
     */
-  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] =
-    ???
+  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
+    (args match {
+      case Nil => putStrLn("Not enough arguments")
+      case filename :: _ =>
+        FileHandle.open(filename).bracket(handle => {
+          handle.close.orDie
+        })(handle => {
+          lazy val loop: ZIO[zio.console.Console with Blocking, IOException, Unit] = handle.read.flatMap {
+            case None =>
+              ZIO.succeed(())
+            case Some(chunk) =>
+              putStrLn(new String(chunk.toArray, StandardCharsets.UTF_8)) *> loop
+          }
+          loop
+        })
+    }).fold(_ => 1, _ => 0)
+  }
 }
 
 object ComputePi extends App {
