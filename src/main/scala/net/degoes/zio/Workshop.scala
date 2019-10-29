@@ -321,7 +321,8 @@ object ComputePi extends App {
       total <- Ref.make(0L)
       inside <- Ref.make(0L)
       state = PiState(inside, total)
-      _ <- sample(state, 1000)
+      worker = sample(state, 100000)
+      _ <- ZIO.collectAllPar(List.fill(4)(worker))
       totalV <- total.get
       insideV <- inside.get
       _ <- putStrLn(s"Estimate value of pi is: ${estimatePi(insideV, totalV)}")
