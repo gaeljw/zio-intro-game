@@ -98,11 +98,11 @@ object NumberGuesser extends App {
     */
   def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
     (for {
-     randomNumber <- nextInt(10)
-     _ <- putStrLn("Guess the number")
-     guess <- getStrLn
-     _ <- analyzeAnswer(randomNumber, guess)
-   } yield ()).fold(_ => 1, _ => 0)
+      randomNumber <- nextInt(10)
+      _ <- putStrLn("Guess the number")
+      guess <- getStrLn
+      _ <- analyzeAnswer(randomNumber, guess)
+    } yield ()).fold(_ => 1, _ => 0)
   }
 }
 
@@ -119,13 +119,23 @@ object AlarmApp extends App {
     * the user to enter a decimal number of seconds.
     */
   lazy val getAlarmDuration: ZIO[Console, IOException, Duration] = {
-    def parseDuration(input: String): IO[NumberFormatException, Duration] =
-      ???
+    def parseDuration(input: String): IO[NumberFormatException, Duration] = {
+      for {
+        double <- ZIO.effect(input.toDouble).refineToOrDie[NumberFormatException]
+      } yield ((double * 1000.0).toInt.milliseconds)
+    }
 
-    def fallback(input: String): ZIO[Console, IOException, Duration] =
-      ???
+    def fallback(input: String): ZIO[Console, IOException, Duration] = {
+      parseDuration(input).orElse(
+        putStrLn("You didn't enter a valid number") *> getAlarmDuration
+      )
+    }
 
-    ???
+    for {
+      _ <- putStrLn("Choose a number of seconds")
+      nbSec <- getStrLn
+      duration <- fallback(nbSec)
+    } yield (duration)
   }
 
   /**
