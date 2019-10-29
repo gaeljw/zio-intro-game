@@ -1,5 +1,7 @@
 package net.degoes.zio
 
+import java.nio.file.{Files, Paths}
+
 import zio._
 
 import scala.io.Source
@@ -203,13 +205,31 @@ object CatIncremental extends App {
     * the blocking thread pool.
     */
   final case class FileHandle private(private val is: InputStream) {
-    final def close: ZIO[Blocking, IOException, Unit] = ???
+    final def close: ZIO[Blocking, IOException, Unit] = {
+      blocking {
+        ZIO.effect(is.close()).refineToOrDie[IOException]
+      }
+    }
 
-    final def read: ZIO[Blocking, IOException, Option[Chunk[Byte]]] = ???
+    final def read: ZIO[Blocking, IOException, Option[Chunk[Byte]]] = {
+      blocking {
+        ZIO.effect {
+          val arr = Array.ofDim[Byte](1024)
+          val read = is.read(arr)
+          if (read == -1) None else Some(Chunk.fromArray(arr))
+        }.refineToOrDie[IOException]
+      }
+    }
   }
 
   object FileHandle {
-    final def open(file: String): ZIO[Blocking, IOException, FileHandle] = ???
+    final def open(file: String): ZIO[Blocking, IOException, FileHandle] = {
+      blocking {
+        ZIO.effect {
+          FileHandle(Files.newInputStream(Paths.get(file)))
+        }.refineToOrDie[IOException]
+      }
+    }
   }
 
   /**
