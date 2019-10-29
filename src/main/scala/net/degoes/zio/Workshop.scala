@@ -126,10 +126,8 @@ object AlarmApp extends App {
     }
 
     def fallback(input: String): ZIO[Console, IOException, Duration] = {
-      parseDuration(input).foldM(error => {
+      parseDuration(input).catchAll(error => {
         putStrLn(s"You entered shit: $input, it caused ${error}") *> getAlarmDuration
-      }, duration => {
-        ZIO.succeed(duration)
       })
     }
 
