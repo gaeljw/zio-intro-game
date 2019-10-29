@@ -88,7 +88,7 @@ object NumberGuesser extends App {
 
   def analyzeAnswer(random: Int, guess: String) =
     if (random.toString == guess.trim) putStrLn("You guessed correctly!")
-    else putStrLn("You did not guess correctly. The answer was ${random}")
+    else putStrLn(s"You did not guess correctly. The answer was ${random}")
 
   /**
     * EXERCISE 5
@@ -96,8 +96,14 @@ object NumberGuesser extends App {
     * Choose a random number (using `nextInt`), and then ask the user to guess
     * the number, feeding their response to `analyzeAnswer`, above.
     */
-  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] =
-    ???
+  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
+    (for {
+     randomNumber <- nextInt(10)
+     _ <- putStrLn("Guess the number")
+     guess <- getStrLn
+     _ <- analyzeAnswer(randomNumber, guess)
+   } yield ()).fold(_ => 1, _ => 0)
+  }
 }
 
 object AlarmApp extends App {
