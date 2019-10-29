@@ -171,7 +171,9 @@ object Cat extends App {
     * the result into a string.
     */
   def readFile(file: String): ZIO[Blocking, IOException, String] = {
-    ZIO.effect(Source.fromFile(file).mkString("\n")).refineToOrDie[IOException]
+    blocking {
+      ZIO.effect(Source.fromFile(file).mkString("\n")).refineToOrDie[IOException]
+    }
   }
 
   /**
