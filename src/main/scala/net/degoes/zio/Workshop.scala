@@ -63,16 +63,22 @@ object PromptName extends App {
 object ZIOTypes {
   type ??? = Nothing
 
+  // ZIO[R, E, A] ~~~ R => Either[E,A]
+  // A : success type
+  // E : failure type
+  // R : environment type
+  //         could be: config, http request, db connection, spark context...
+
   /**
     * EXERCISE 4
     *
     * Provide definitions for the ZIO type aliases below.
     */
-  type Task[+A] = ???
-  type UIO[+A] = ???
-  type RIO[-R, +A] = ???
-  type IO[+E, +A] = ???
-  type URIO[-R, +A] = ???
+  type Task[+A] = ZIO[Any, Throwable, A]
+  type UIO[+A] = ZIO[Any, Nothing, A] // U = Unexceptionnal
+  type RIO[-R, +A] = ZIO[R, Throwable, A] // R = environment / reader
+  type IO[+E, +A] = ZIO[Any, E, A]
+  type URIO[-R, +A] = ZIO[R, Nothing, A]
 }
 
 object NumberGuesser extends App {
