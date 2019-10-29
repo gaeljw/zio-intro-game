@@ -126,11 +126,11 @@ object AlarmApp extends App {
     }
 
     def fallback(input: String): ZIO[Console, IOException, Duration] = {
-      parseDuration(input).tapError(error => {
-        putStrLn(s"You entered shit: $input, it caused ${error}")
-      }).orElse(
-        putStrLn("You didn't enter a valid number") *> getAlarmDuration
-      )
+      parseDuration(input).foldM(error => {
+        putStrLn(s"You entered shit: $input, it caused ${error}") *> getAlarmDuration
+      }, duration => {
+        ZIO.succeed(duration)
+      })
     }
 
     for {
