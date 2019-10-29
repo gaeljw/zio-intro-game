@@ -182,8 +182,12 @@ object Cat extends App {
     * Implement a version of the command-line utility "cat", which dumps the
     * contents of the specified file to standard output.
     */
-  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] =
-    ???
+  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
+    (args match {
+      case Nil => putStrLn("Not enough arguments")
+      case filename :: _ => readFile(filename).flatMap(putStrLn)
+    }).fold(_ => 1, _ => 0)
+  }
 }
 
 object CatIncremental extends App {
