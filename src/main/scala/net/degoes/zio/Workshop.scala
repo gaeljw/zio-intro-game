@@ -56,7 +56,7 @@ object PromptName extends App {
       _ <- putStrLn("Please enter your name:")
       name <- getStrLn
       _ <- putStrLn(s"Hello $name")
-    } yield 0).orElse(ZIO.succeed(StdInputFailed))
+    } yield name).fold(_ => StdInputFailed, _ => 0)
   }
 }
 
