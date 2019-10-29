@@ -50,7 +50,15 @@ object PromptName extends App {
     * Implement a simple program that asks the user for their name (using
     * `getStrLn`), and then prints it out to the user (using `putStrLn`).
     */
-  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = ???
+  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
+
+
+    putStrLn("Please enter your name:").flatMap(_ => {
+      getStrLn.flatMap(name => {
+        putStrLn(s"Hello $name")
+      })
+    }).as(0).orElse(ZIO.succeed(StdInputFailed))
+  }
 }
 
 object ZIOTypes {
