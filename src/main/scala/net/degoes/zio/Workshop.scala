@@ -293,14 +293,40 @@ object ComputePi extends App {
   val randomPoint: ZIO[Random, Nothing, (Double, Double)] =
     nextDouble zip nextDouble
 
+  def sample(state: PiState, iterations: Int): ZIO[Random, Nothing, Unit] = {
+    if (iterations <= 0) {
+      ZIO.unit
+    } else {
+      (for {
+        random <- randomPoint
+        (x, y) = random
+        _ <- state.total.update(_ + 1)
+        _ <- if (insideCircle(x, y)) {
+          state.inside.update(_ + 1)
+        } else {
+          ZIO.unit
+        }
+      } yield ()) *> sample(state, iterations - 1)
+    }
+  }
+
   /**
     * EXERCISE 12
     *
     * Build a multi-fiber program that estimates the value of `pi`. Print out
     * ongoing estimates continuously until the estimation is complete.
     */
-  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] =
-    ???
+  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
+    (for {
+      total <- Ref.make(0L)
+      inside <- Ref.make(0L)
+      state = PiState(inside, total)
+      _ <- sample(state, 1000)
+      totalV <- total.get
+      insideV <- inside.get
+      _ <- putStrLn(s"Estimate value of pi is: ${estimatePi(insideV, totalV)}")
+    } yield ()).fold(_ => 1, _ => 0)
+  }
 }
 
 object Hangman extends App {
