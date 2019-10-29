@@ -3,6 +3,7 @@ package net.degoes.zio
 import zio._
 
 object HelloWorld extends App {
+
   import zio.console._
 
   /**
@@ -12,7 +13,7 @@ object HelloWorld extends App {
     */
   def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
     putStrLn("Hello world Gael \\o/").zipRight(
-    putStrLn("Goodbye world Gael \\o/").map(_ => 0)
+      putStrLn("Goodbye world Gael \\o/").map(_ => 0)
     )
   }
 
@@ -51,13 +52,11 @@ object PromptName extends App {
     * `getStrLn`), and then prints it out to the user (using `putStrLn`).
     */
   def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
-
-
-    putStrLn("Please enter your name:").flatMap(_ => {
-      getStrLn.flatMap(name => {
-        putStrLn(s"Hello $name")
-      })
-    }).as(0).orElse(ZIO.succeed(StdInputFailed))
+    (for {
+      _ <- putStrLn("Please enter your name:")
+      name <- getStrLn
+      _ <- putStrLn(s"Hello $name")
+    } yield 0).orElse(ZIO.succeed(StdInputFailed))
   }
 }
 
@@ -77,6 +76,7 @@ object ZIOTypes {
 }
 
 object NumberGuesser extends App {
+
   import zio.console._
   import zio.random._
 
@@ -95,6 +95,7 @@ object NumberGuesser extends App {
 }
 
 object AlarmApp extends App {
+
   import zio.console._
   import zio.duration._
   import java.io.IOException
@@ -127,6 +128,7 @@ object AlarmApp extends App {
 }
 
 object Cat extends App {
+
   import zio.console._
   import zio.blocking._
   import java.io.IOException
@@ -150,6 +152,7 @@ object Cat extends App {
 }
 
 object CatIncremental extends App {
+
   import zio.console._
   import zio.blocking._
   import java.io._
@@ -160,11 +163,12 @@ object CatIncremental extends App {
     * Implement all missing methods of `FileHandle`. Be sure to do all work on
     * the blocking thread pool.
     */
-  final case class FileHandle private (private val is: InputStream) {
+  final case class FileHandle private(private val is: InputStream) {
     final def close: ZIO[Blocking, IOException, Unit] = ???
 
     final def read: ZIO[Blocking, IOException, Option[Chunk[Byte]]] = ???
   }
+
   object FileHandle {
     final def open(file: String): ZIO[Blocking, IOException, FileHandle] = ???
   }
@@ -181,6 +185,7 @@ object CatIncremental extends App {
 }
 
 object ComputePi extends App {
+
   import zio.random._
   import zio.console._
 
@@ -189,9 +194,9 @@ object ComputePi extends App {
     * and total number of points.
     */
   final case class PiState(
-      inside: Ref[Long],
-      total: Ref[Long]
-  )
+                            inside: Ref[Long],
+                            total: Ref[Long]
+                          )
 
   /**
     * A function to estimate pi.
@@ -223,6 +228,7 @@ object ComputePi extends App {
 }
 
 object Hangman extends App {
+
   import zio.console._
   import zio.random._
   import java.io.IOException
@@ -262,10 +268,10 @@ object Hangman extends App {
 
     /**
       *
-      *  f     n  c  t  o
+      * f     n  c  t  o
       *  -  -  -  -  -  -  -
       *
-      *  Guesses: a, z, y, x
+      * Guesses: a, z, y, x
       *
       */
     val word =
@@ -293,12 +299,19 @@ object Hangman extends App {
   }
 
   sealed trait GuessResult
+
   object GuessResult {
+
     case object Won extends GuessResult
+
     case object Lost extends GuessResult
+
     case object Correct extends GuessResult
+
     case object Incorrect extends GuessResult
+
     case object Unchanged extends GuessResult
+
   }
 
   def guessResult(oldState: State, newState: State, char: Char): GuessResult =
@@ -325,6 +338,7 @@ object Hangman extends App {
   * demonstrate its correctness and testability.
   */
 object TicTacToe extends App {
+
   import zio.console._
 
   sealed trait Mark {
@@ -332,14 +346,19 @@ object TicTacToe extends App {
       case Mark.X => 'X'
       case Mark.O => 'O'
     }
+
     final def render: String = renderChar.toString
   }
+
   object Mark {
+
     case object X extends Mark
+
     case object O extends Mark
+
   }
 
-  final case class Board private (value: Vector[Vector[Option[Mark]]]) {
+  final case class Board private(value: Vector[Vector[Option[Mark]]]) {
 
     /**
       * Retrieves the mark at the specified row/col.
@@ -384,34 +403,35 @@ object TicTacToe extends App {
         wonBy(0, 2, 1, 0, mark)
 
     private final def wonBy(
-        row0: Int,
-        col0: Int,
-        rowInc: Int,
-        colInc: Int,
-        mark: Mark
-    ): Boolean =
+                             row0: Int,
+                             col0: Int,
+                             rowInc: Int,
+                             colInc: Int,
+                             mark: Mark
+                           ): Boolean =
       extractLine(row0, col0, rowInc, colInc).collect { case Some(v) => v }.toList == List
         .fill(3)(mark)
 
     private final def extractLine(
-        row0: Int,
-        col0: Int,
-        rowInc: Int,
-        colInc: Int
-    ): Iterable[Option[Mark]] =
+                                   row0: Int,
+                                   col0: Int,
+                                   rowInc: Int,
+                                   colInc: Int
+                                 ): Iterable[Option[Mark]] =
       for {
         row <- (row0 to (row0 + rowInc * 2))
         col <- (col0 to (col0 + colInc * 2))
       } yield value(row)(col)
   }
+
   object Board {
     final val empty = new Board(Vector.fill(3)(Vector.fill(3)(None)))
 
     def fromChars(
-        first: Iterable[Char],
-        second: Iterable[Char],
-        third: Iterable[Char]
-    ): Option[Board] =
+                   first: Iterable[Char],
+                   second: Iterable[Char],
+                   third: Iterable[Char]
+                 ): Option[Board] =
       if (first.size != 3 || second.size != 3 || third.size != 3) None
       else {
         def toMark(char: Char): Option[Mark] =
