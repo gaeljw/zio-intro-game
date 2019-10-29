@@ -2,6 +2,8 @@ package net.degoes.zio
 
 import zio._
 
+import scala.io.Source
+
 object HelloWorld extends App {
 
   import zio.console._
@@ -168,7 +170,9 @@ object Cat extends App {
     * Implement a function to read a file on the blocking thread pool, storing
     * the result into a string.
     */
-  def readFile(file: String): ZIO[Blocking, IOException, String] = ???
+  def readFile(file: String): ZIO[Blocking, IOException, String] = {
+    ZIO.effect(Source.fromFile(file).mkString("\n")).refineToOrDie[IOException]
+  }
 
   /**
     * EXERCISE 9
