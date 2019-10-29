@@ -10,8 +10,12 @@ object HelloWorld extends App {
     *
     * Implement a simple "Hello World" program using the effect returned by `putStrLn`.
     */
-  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] =
-    ZIO.succeed(0)
+  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
+    putStrLn("Hello world Gael \\o/").zipRight(
+    putStrLn("Goodbye world Gael \\o/").map(_ => 0)
+    )
+  }
+
 }
 
 object ErrorConversion extends App {
@@ -30,7 +34,9 @@ object ErrorConversion extends App {
     * Using `ZIO#orElse` or `ZIO#fold`, have the `run` function compose the
     * preceding `failed` effect into the effect that `run` returns.
     */
-  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = ???
+  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
+    failed.map(_ => 0).orElse(ZIO.succeed(1))
+  }
 }
 
 object PromptName extends App {
